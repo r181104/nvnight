@@ -34,8 +34,6 @@ vim.o.winborder = "rounded"
 
 vim.pack.add({
   { src = "https://github.com/stevearc/oil.nvim" },
-  -- { src = "https://github.com/ibhagwan/fzf-lua" },
-  -- { src = "https://github.com/nvim-tree/nvim-web-devicons" },
   { src = "https://github.com/mason-org/mason.nvim" },
   { src = "https://github.com/nvim-treesitter/nvim-treesitter" },
   { src = "https://github.com/chomosuke/typst-preview.nvim" },
@@ -43,10 +41,19 @@ vim.pack.add({
   { src = "https://github.com/kdheepak/lazygit.nvim" },
   { src = "https://github.com/catppuccin/nvim" },
   { src = 'https://github.com/NvChad/showkeys',                cmd = "ShowkeysToggle" },
-  { src = "https://github.com/echasnovski/mini.pick" },
+  { src = "https://github.com/ibhagwan/fzf-lua" },
+  { src = "https://github.com/nvim-tree/nvim-web-devicons" },
+  { src = "https://github.com/folke/which-key.nvim" },
+  { src = "https://github.com/catgoose/nvim-colorizer.lua" },
+  { src = "https://github.com/nvim-lualine/lualine.nvim" },
+  { src = "https://github.com/rcarriga/nvim-notify" },
+  { src = "https://github.com/MunifTanjim/nui.nvim" },
+  { src = "https://github.com/folke/noice.nvim" },
+  { src = "https://github.com/lewis6991/gitsigns.nvim" },
+  { src = "https://github.com/otavioschwanck/arrow.nvim" },
 })
 
-require "mini.pick".setup()
+require "which-key".setup()
 require("catppuccin").setup({
   flavour = "mocha",
   transparent_background = true,
@@ -68,15 +75,15 @@ require("catppuccin").setup({
     comments = { "italic" },
     conditionals = { "bold" },
     loops = {},
-    functions = {},
-    keywords = {},
-    strings = {},
+    functions = { "italic" },
+    keywords = { "bold" },
+    strings = { "bold" },
     variables = {},
-    numbers = {},
-    booleans = {},
+    numbers = { "italic" },
+    booleans = { "italic" },
     properties = {},
     types = {},
-    operators = {},
+    operators = { "bold" },
   },
   color_overrides = {},
   custom_highlights = {},
@@ -94,7 +101,81 @@ require("catppuccin").setup({
     },
   },
 })
-vim.cmd.colorscheme "catppuccin-mocha"
+vim.cmd.colorscheme "catppuccin-macchiato"
+
+require("lualine").setup({
+  options = {
+    theme = "catppuccin-mocha",
+    section_separators = { left = "", right = "" },
+    component_separators = { left = "", right = "" },
+  },
+  sections = {
+    lualine_a = { "mode" },
+    lualine_b = { "branch", "diff" },
+    lualine_c = { "filename" },
+    lualine_x = { "encoding", "fileformat", "filetype" },
+    lualine_y = { "progress" },
+    lualine_z = { "location" },
+  },
+})
+
+require('arrow').setup({
+  show_icons = true,
+  leader_key = ';',        -- Recommended to be a single key
+  buffer_leader_key = 'm', -- Per Buffer Mappings
+})
+
+local fzf = require("fzf-lua")
+fzf.setup({
+  winopts = {
+    height = 0.9,
+    width = 0.9,
+    preview = {
+      hidden = "hidden",
+    },
+  },
+  keymap = {
+    fzf = {
+      ["tab"] = "down",
+      ["shift-tab"] = "up",
+      ["ctrl-p"] = "toggle-preview",
+    },
+  },
+})
+vim.keymap.set("n", "<leader>ff", fzf.files, { desc = "Find files" })
+vim.keymap.set("n", "<leader>fg", fzf.live_grep, { desc = "Search text" })
+vim.keymap.set("n", "<leader>fb", fzf.buffers, { desc = "Find buffers" })
+
+require("noice").setup({
+  lsp = {
+    override = {
+      ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
+      ["vim.lsp.util.stylize_markdown"] = true,
+      ["cmp.entry.get_documentation"] = true,
+    },
+  },
+  presets = {
+    bottom_search = true,
+    command_palette = true,
+    long_message_to_split = true,
+    inc_rename = false,
+    lsp_doc_border = false,
+  },
+})
+
+require("gitsigns").setup({
+  signs = {
+    add = { text = "+" },
+    change = { text = "~" },
+    delete = { text = "_" },
+  },
+})
+vim.keymap.set("n", "<leader>gb", ":Gitsigns blame_line<CR>", { desc = "Git blame" })
+
+require("notify").setup({
+  background_colour = "#000000",
+})
+
 require "showkeys".setup({ position = "top-right" })
 require('nvim-treesitter.configs').setup({
   auto_install = true,
@@ -103,6 +184,37 @@ require('nvim-treesitter.configs').setup({
   },
 })
 require "mason".setup()
+
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+  pattern = { "bspwmrc", "sxhkdrc" },
+  command = "set filetype=sh",
+})
+
+require("colorizer").setup({
+  filetypes = {
+    "*",
+  },
+  user_default_options = {
+    RGB = true,
+    RRGGBB = true,
+    RRGGBBAA = true,
+    AARRGGBB = true,
+    rgb_fn = true,
+    rgba_fn = true,
+    hsl_fn = true,
+    hsla_fn = true,
+    css = true,
+    css_fn = true,
+    names = true,
+    tailwind = true,
+    sass = { enable = true, parsers = { "css" } },
+    mode = "background",
+    virtualtext = "■",
+    always_update = true,
+  },
+})
+vim.keymap.set("n", "<leader>tc", "<cmd>ColorizerToggle<CR>", { desc = "Toggle Colorizer" })
+
 require("oil").setup({
   default_file_explorer = true,
   columns = { "icon" },
@@ -134,6 +246,7 @@ require("oil").setup({
   },
   use_default_keymaps = false,
 })
+
 vim.cmd(":hi statusline guibg=NONE")
 
 vim.lsp.enable({ "lua_ls", "svelte-language-server", "tinymist", "emmetls", "pylsp" })
@@ -144,12 +257,24 @@ vim.api.nvim_create_autocmd('LspAttach', {
     if client:supports_method('textDocument/completion') then
       vim.lsp.completion.enable(true, client.id, ev.buf, { autotrigger = true })
     end
+    local opts = { buffer = ev.buf }
+    local map = vim.keymap.set
+    map('n', 'gd', vim.lsp.buf.definition, opts)
+    map('n', 'gD', vim.lsp.buf.declaration, opts)
+    map('n', 'gi', vim.lsp.buf.implementation, opts)
+    map('n', 'gr', vim.lsp.buf.references, opts)
+    map('n', 'K', vim.lsp.buf.hover, opts)
+    map('n', '<leader>ca', vim.lsp.buf.code_action, opts)
+    map('n', '<leader>for', function()
+      vim.lsp.buf.format({ async = true })
+    end, opts)
   end
 })
 vim.cmd("set completeopt+=noselect")
 
 local map = vim.keymap.set
 vim.g.mapleader = " "
+map({ "i", "v", "x", "t", "c" }, "<M-;>", "<ESC>")
 map('n', '<leader>so', ':update<CR> :source<CR>')
 map('n', '<leader>w', ':write<CR>')
 map('n', '<leader>q', ':quit<CR>')
@@ -157,14 +282,16 @@ map({ "n", "v", "x" }, "<Leader>y", '"+y', { noremap = true, silent = true })
 map({ "n", "v", "x" }, "<Leader>d", '"+d', { noremap = true, silent = true })
 map({ "n", "v", "x" }, "<Leader>s", ":e #<CR>")
 map({ "n", "v", "x" }, "<Leader>sf", ":sf #<CR>")
-map({ "i", "v", "x", "t", "c" }, "jk", "<C-c>")
-map('n', '<leader>for', vim.lsp.buf.format)
 map('n', '<leader>e', ':Oil<CR>')
 map("n", "<C-h>", "<cmd> TmuxNavigateLeft<CR>")
 map("n", "<C-j>", "<cmd> TmuxNavigateDown<CR>")
 map("n", "<C-k>", "<cmd> TmuxNavigateUp<CR>")
 map("n", "<C-l>", "<cmd> TmuxNavigateRight<CR>")
 map("n", "<leader>git", ":LazyGit<CR>")
-map('n', '<leader>ff', ":Pick files<CR>")
-map('n', '<leader>fh', ":Pick help<CR>")
 map("n", "<leader>e", "<CMD>Oil<CR>", { desc = "Open oil file explorer" })
+
+vim.keymap.set('n', 'gd', vim.lsp.buf.definition)
+vim.keymap.set('n', 'K', vim.lsp.buf.hover)
+vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename)
+vim.keymap.set('n', '<leader>ca', vim.lsp.buf.code_action)
+vim.keymap.set('n', 'gr', vim.lsp.buf.references)
